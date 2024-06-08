@@ -29,6 +29,8 @@ class VariableLengthMarkovChain:
         #allowing to effectively generate the next state
         if set_order>self.max_order:
             set_order=self.max_order
+        if set_order<1:
+            set_order=1    
         for order in range(set_order, 0, -1):
             if state[(set_order-order):set_order] in self.transitions:
                 choices, weights = zip(*self.transitions[state[(set_order-order):set_order]].items())

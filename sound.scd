@@ -1,9 +1,10 @@
 ServerOptions.inDevices;
 Server.default.options.inDevice_("MacBook Pro Microphone");
-Server.default.options.memSize=8192*50;
-s.boot;
 
 (
+Server.default.options.memSize=8192*100;
+s.boot;
+
 SynthDef(\reverb, {
 	arg in = 98,
 		processMode = 0, // 0 uses Control values, 1 uses Bus for any param suffix Bus.
@@ -237,22 +238,57 @@ z=Synth.new(\reverb);
 }.fork;
 
 
+
+SynthDef(\triOsc, {
+	arg freq=440, amp=0.1, time=1, detune=25, filterFreq=1000;
+	var env =EnvGen.ar( Env.new([0,amp, 0], [time/2, time/2]), doneAction: Done.freeSelf);
+	var sound;
+	var tri=LFTri.ar(freq*(1+detune/100), 0, 0.5);   //OScillatore a onda triangolare con detune
+	var sqr=LFPar.ar(freq, 0, 0.5);            //Oscillatore a onda quadra
+	//var noise=WhiteNoise.ar(amp)*0.35;                    //Rumore bianco per la texture
+	var filteredSound;
+
+
+	sound=tri+sqr;
+
+	sound=FreeVerb.ar(sound, 1, 0.9,0.5);
+	//sound = CombN.ar(sound, 0.1, 0.1, 4); // Aggiunge riverbero
+	//sound=DelayC.ar(sound, 0.5, 0.5, 1);
+	filteredSound=LPF.ar(sound, filterFreq);
+	//filteredSound= filteredSound* env;
+
+
+	Out.ar([0,1], filteredSound*env*amp);
+}).add;
+
+
+
+
 OSCdef.new(\0,
 	{
 		arg msg;
 		postln(msg);
-		x=Synth.new(\paulstretchMono, [\bufnum, ~buffer.bufnum, \envBufnum, ~envBuf.bufnum, \rate1, 2**((msg[1]-24)/12), \dur, 2*msg[4], \amp, msg[2].linexp(0, 127, 0.5, 1)]);
-		//x.set(\rate1, 2**((msg[1])/12));
-		//x.set(\gate, 1.0);
-		//{x.set(\gate, 0.0)}.defer(0.1);
-		//{BPF.ar(WhiteNoise.ar, [msg[1]-12, msg[1]-12 ].midicps, 1e-5, Env.sine(4*msg[4]).kr(msg[2])).sum!2 * 200}.play;
+		//x=Synth.new(\paulstretchMono, [\bufnum, ~buffer.bufnum, \envBufnum, ~envBuf.bufnum, \rate1, 2**((msg[1]-24)/12), \dur, 2*msg[4], \amp, msg[2].linexp(0, 127, 0.5, 1)]);
+		k=Synth.new(\triOsc, [\freq, (msg[1]+12).midicps, \time, 2*msg[4], \amp, msg[2].linexp(0, 127, 0.2, 0.7)]);
+		//{BPF.ar(WhiteNoise.ar, [msg[1]-12, msg[1]-12 ].midicps, 1e-5, Env.sine(2*msg[4]).kr(msg[2])).sum!2}.play;
 	},
 	'/numbers',
 	nil,
 	57120
 );
 
-
+OSCdef.new(\chan1,
+	{
+		arg msg;
+		postln(msg);
+		//y.set(\amp, msg[1]*1.5);
+		//a.set(\freq, LinLin.kr(msg[1], 0, 1, 100, 800));
+	},
+	'/chan1',
+	nil,
+	10000
+);
+/*
 	b = NetAddr.new("127.0.0.1", 57000);
 	// Funzione che manda numeri causali che rappresentano il set_order del markov model
 	~valori = [3, 4, 5, 6, 7, 8];
@@ -265,98 +301,5 @@ OSCdef.new(\0,
 			3.wait;
 	        }
     }).play;
-
-)
-
-a.set(\amp, 0);
-a.set(\freq, 500);
-y.set(\amp, 1);
-y.set(\cutoff, 1000);
-
-s.quit;
-
-
-//z.set(\shimmerPitch, 2);
-//z.set(\shimmerPitch, 1);
-//z.set(\gain, 0);
-//z.set(\decayRate, 0.97);
-//z.set(\damping, 0.00000005);
-//z.set(\excursionRate, 5);
-//z.set(\bandwidth, 0.998);
-//z.set(\mix, 0.7);
-//x.set(\stretch, 2);
-/*
-		processMode = 0, // 0 uses Control values, 1 uses Bus for any param suffix Bus.
-		gain = 0, mix = 0.35,
-		processGain = 0, processGainBus = 99,
-		preDelay = 0.001, bandwidth = 0.998,
-		decayRate = 0.9, decayRateBus = 99,
-		tailDensity = 0.7, damping = 0.0005,
-		excursionDepth = 0.2, excursionRate = 2,
-		shimmerPitch = 2, shimmerPitchBus = 99,
-		out = 0;
 */
-
-/*
-x.set(\rate1, 0.5); //0.5 0.56 0.65 0.67 0.75 0.85 0.9
-x.set(\rate1, 0.56);
-x.set(\rate1, 0.65);
-x.set(\rate1, 0.67);
-x.set(\rate1, 0.75);
-x.set(\rate1, 0.85);
-x.set(\rate1, 0.9);
-x.set(\rate1, 4);
-x.set(\amp, 0);
-x.free
-//subtractive synthesis
-{BPF.ar(WhiteNoise.ar, [76, 80].midicps, 1e-5, Env.sine(10).kr(2)).sum!2 * 50}.play;
-
-
-{EnvGen.kr(Env([0, 2, 0], [0.5, 0.5]), Impulse.kr(1))}.plot(5);
-Env.new([0.01, 2, 0.01], [3, 7], [-3, 4]).plot
-Env.new([0, 1, 0], [8, 12], [-1, 2]).plot
-{Env.sine(2).kr(0.1)}.plot(5)
-
-//thisProcess.platform.recordingsDir
-
-(
-~b3 = Buffer.readChannel(s, thisProcess.nowExecutingPath.dirname +/+ "Voice.mp3", channels: 0);
-
-// audio
-SynthDef.new("rat", {
-	arg out = 0, tFreq =15, dur = 0.1, rate = 1, pos = 0.8;
-	var sig, env, attack=0, decay=1, ratio;
-
-
-	ratio=Impulse.ar(tFreq);
-
-
-
-
-	//env =  EnvGen.ar(Env([0, 1, 0], [attack, decay], curve: 0), Impulse.kr(1/(attack+decay)));
-
-	sig=GrainBuf.ar(
-		numChannels: 2,
-		trigger: ratio,
-		dur: dur,
-		sndbuf: ~b3,
-		rate: rate,
-		//pos: (pos+LFSaw.ar(10*1/BufDur.ir(~b3)).range(0, (BufSamples.ir(~b3)-1)/10)),
-		pos: 0.8-LFSaw.ar(1/(10*BufDur.ir(~b3))),
-		//pos: pos,
-		interp: 2,
-		pan: 0,
-		envbufnum: -1,
-		maxGrains: 512);
-
-	//sig = sig*env;
-	Out.ar(99, FreeVerb.ar(sig, 0, 1, 0.1, 10, 0));
-
-}).add;
-
-y = Synth.new(\rat);
 )
-
-y.free
-
-*/

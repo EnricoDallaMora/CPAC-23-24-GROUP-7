@@ -6,18 +6,20 @@ import time
 from my_chain import VariableLengthMarkovChain
 from threading import Thread
 import re
+import numpy as np
+from sklearn.preprocessing import QuantileTransformer
+from scipy.stats import norm
 
 
 #PARAMETERS------------------------------------------------------------------------------
 
-max_order=8
+max_order=5
 set_order=1
-velocity_quantization=16
-time_quantization=64
-dur_quantization=64
-tempo_modifier=1
-dataset_directory=Path("./maestro-v3.0.0/2017")
-
+velocity_quantization=4
+time_quantization=8 
+dur_quantization=8
+tempo_modifier=2
+dataset_directory=Path("./maestro-v3.0.0/test")
 
 
 
@@ -57,7 +59,10 @@ def range_map(OldMax, OldMin, NewMax, NewMin, OldValue):
 #Function to menage the received OSC message for closeness (set order)
 def handle_message(address, tags, data, client_address):
     global set_order
-    set_order = data[0]
+    if int(data[0])<1:
+        set_order=1
+    else:
+        set_order = int(data[0])
     print(f"Ricevuto messaggio da {address}: {set_order}")
 
 #Function to run the server in a separated thread
@@ -225,14 +230,14 @@ while True:
     temp = re.findall(r'\d+', next_state_notes)
     res = list(map(int, temp))
     next_state_notes=res[0]
-    next_state_velocity=range_map(velocity_quantization, 0, max_velocity_value, 0, res[1])
-    next_state_time=range_map(time_quantization, 0, max_time_value, 0, res[2])
-    next_state_dur= mido.tick2second(range_map(dur_quantization, 0, max_dur_value, 50, res[3]), ticks_per_beat, tempo)
+    next_state_velocity=int(range_map(velocity_quantization, 0, max_velocity_value, 0, res[1]))
+    next_state_time=range_map(time_quantization, 0, max_time_value, 50, res[2])
+    next_state_dur= mido.tick2second(range_map(dur_quantization, 0, max_dur_value, 150, res[3]), ticks_per_beat, tempo)
 
     #prepare the message
     msg = pyOSC3.OSCMessage()
     msg.setAddress("/numbers")
-    out=[next_state_notes, next_state_velocity, next_state_time, next_state_dur]
+    out=[next_state_notes, next_state_velocity, next_state_time, next_state_dur, set_order]
     msg.append(out)
     
     #compute the delta time, it's the time that should pass between the last note played and the current note
