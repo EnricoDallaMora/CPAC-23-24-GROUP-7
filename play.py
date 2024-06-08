@@ -237,7 +237,7 @@ while True:
     #prepare the message
     msg = pyOSC3.OSCMessage()
     msg.setAddress("/numbers")
-    out=[next_state_notes, next_state_velocity, next_state_time, next_state_dur, set_order]
+    out=[next_state_notes, next_state_velocity, next_state_time, next_state_dur]
     msg.append(out)
     
     #compute the delta time, it's the time that should pass between the last note played and the current note
