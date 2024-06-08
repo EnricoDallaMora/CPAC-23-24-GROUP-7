@@ -26,7 +26,7 @@ Developed by:
 - [Lorenzo Previati](https://github.com/LorenzoPreviati22)
 
 ## Links
-- [Project Proposal Presentation](./prototipo_cpac.pdf)
+- [Project Proposal Presentation](./assets/presentation/prototipo_cpac.pdf)
 - [Final Project Presentation]()
 - [📄Report]()
 - [🎞️Video Demo]()
