@@ -1,8 +1,8 @@
 ServerOptions.inDevices;
-Server.default.options.inDevice_("MacBook Pro Microphone");
 
 (
 Server.default.options.memSize=8192*100;
+//Server.default.options.inDevice_("Gruppo microfoni (Realtek(R) Audio");
 s.boot;
 
 // SYNTHS------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ SynthDef(\clean, {
 }).add;
 
 SynthDef(\shimmerwet, {
-	arg amp=10, cutoff=1200;
+	arg amp=0.1, cutoff=1200;
 	var in;
 	in=In.ar(94, 2);
 	3.do{in=in.distort;
