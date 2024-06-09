@@ -15,11 +15,13 @@ from scipy.stats import norm
 
 max_order=5
 set_order=1
-velocity_quantization=4
-time_quantization=8 
-dur_quantization=8
-tempo_modifier=2
-dataset_directory=Path("./maestro-v3.0.0/test")
+N_vel=8
+N_time=8
+N_dur=8
+spacing=1
+tempo_modifier_max=8
+tempo_modifier_min=2
+dataset_directory=Path("./maestro-v3.0.0/2017")
 
 
 
@@ -49,12 +51,43 @@ def setup_time(file: mido.MidiFile):
 
     return tempo, bpm
 
-#Function to map variables from one range to another
-def range_map(OldMax, OldMin, NewMax, NewMin, OldValue):
-    OldRange = (OldMax - OldMin)  
-    NewRange = (NewMax - NewMin)  
-    NewValue = (((OldValue - OldMin) * NewRange) / OldRange) + NewMin
-    return NewValue
+#Function to quantize values on a set of indexes centered on the peak of a gaussian distribution of the values
+def transform_and_quantize(values, N, spacing):
+    # Reshape values for QuantileTransformer
+    values = np.array(values).reshape(-1, 1)
+    
+    # Quantile transformation to uniform distribution
+    qt = QuantileTransformer(n_quantiles=min(len(values), 100), output_distribution='uniform')
+    uniform_values = qt.fit_transform(values)
+    
+    # Transform uniform distribution to Gaussian distribution
+    gaussian_values = norm.ppf(uniform_values)
+    
+    # Define quantization levels directly over a standard Gaussian range
+    quantization_levels = np.linspace(-spacing, spacing, N)
+    
+    # Quantize the Gaussian-distributed values
+    quantized_indices = np.digitize(gaussian_values, quantization_levels, right=True) - 1
+    quantized_indices = np.clip(quantized_indices, 0, N-1)
+    
+    return quantized_indices, qt
+
+#Function to convert back indexes to original values from the gaussian distribution
+def inverse_transform(quantized_indices, qt, N, spacing):
+    # Define quantization levels directly over a standard Gaussian range
+    quantization_levels = np.linspace(-spacing, spacing, N)
+    
+    # Get the Gaussian values from quantized indices
+    gaussian_values = quantization_levels[quantized_indices]
+    
+    # Transform Gaussian values back to uniform distribution
+    uniform_values = norm.cdf(gaussian_values)
+    
+    # Inverse transform uniform distribution back to original values
+    original_values = qt.inverse_transform(uniform_values.reshape(-1, 1))
+    
+    return original_values.ravel()
+
 
 #Function to menage the received OSC message for closeness (set order)
 def handle_message(address, tags, data, client_address):
@@ -134,20 +167,19 @@ with open("Notes_int_dur.txt", "w") as text_file:
 #higher the chance of one tuple appearing more than once 
 #(i.e. making the generation less deterministic)
 velocity_values = [row[1] for row in notes_int_dur]
-max_velocity_value = max(velocity_values)
-for row in notes_int_dur:
-    row[1]=round(range_map(max_velocity_value, 0, velocity_quantization, 0, row[1]))
+processed_column, qt_vel = transform_and_quantize(velocity_values, N_vel, spacing)
+for i in range(len(notes_int_dur)):
+    notes_int_dur[i][1] = processed_column[i]
 
 time_values = [row[2] for row in notes_int_dur]
-max_time_value = max(time_values)
-for row in notes_int_dur:
-    row[2]=round(range_map(max_time_value, 0, time_quantization, 0, row[2]))
+processed_column, qt_time = transform_and_quantize(time_values, N_time, spacing)
+for i in range(len(notes_int_dur)):
+    notes_int_dur[i][2] = processed_column[i]
 
 dur_values = [row[3] for row in notes_int_dur]
-max_dur_value = max(dur_values)
-min_dur_value = min(dur_values)
-for row in notes_int_dur:
-    row[3]=round(range_map(max_dur_value, min_dur_value, dur_quantization, 0, row[3]))
+processed_column, qt_dur = transform_and_quantize(dur_values, N_dur, spacing)
+for i in range(len(notes_int_dur)):
+    notes_int_dur[i][3] = processed_column[i]
 
 #Print stuff for control purposes, to be deleated once the code is definitive
 with open("Notes_int_dur_ranged.txt", "w") as text_file:
@@ -171,7 +203,7 @@ with mido.MidiFile(first_file_midi) as file:
     ticks_per_beat = file.ticks_per_beat
 
 print(tempo, bpm, ticks_per_beat)
-tempo*=tempo_modifier
+
 
 
 
@@ -213,6 +245,7 @@ with open("Output.txt", "w") as text_file:
 
 #Generation
 while True:
+    tempo_osc=tempo*(tempo_modifier_max-((set_order-max_order)/(1-max_order))*(tempo_modifier_min-tempo_modifier_max))
     state_notes=tuple(all_states[(len(all_states)-set_order):len(all_states)])
     next_state_notes = markov_chain_notes.generate(state_notes, set_order)
     all_states.append(next_state_notes)
@@ -230,9 +263,9 @@ while True:
     temp = re.findall(r'\d+', next_state_notes)
     res = list(map(int, temp))
     next_state_notes=res[0]
-    next_state_velocity=int(range_map(velocity_quantization, 0, max_velocity_value, 0, res[1]))
-    next_state_time=range_map(time_quantization, 0, max_time_value, 50, res[2])
-    next_state_dur= mido.tick2second(range_map(dur_quantization, 0, max_dur_value, 150, res[3]), ticks_per_beat, tempo)
+    next_state_velocity = int(inverse_transform(res[1], qt_vel, N_vel, spacing)[0])
+    next_state_time = int(inverse_transform(res[2], qt_time, N_time, spacing)[0])
+    next_state_dur= mido.tick2second(int(inverse_transform(res[3], qt_dur, N_dur, spacing)[0]), ticks_per_beat, tempo_osc)
 
     #prepare the message
     msg = pyOSC3.OSCMessage()
@@ -241,7 +274,7 @@ while True:
     msg.append(out)
     
     #compute the delta time, it's the time that should pass between the last note played and the current note
-    delta_time = mido.tick2second(next_state_time, ticks_per_beat, tempo)
+    delta_time = mido.tick2second(next_state_time, ticks_per_beat, tempo_osc)
     print(delta_time)
     time.sleep(delta_time)
 

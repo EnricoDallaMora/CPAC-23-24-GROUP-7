@@ -5,8 +5,86 @@ Server.default.options.inDevice_("MacBook Pro Microphone");
 Server.default.options.memSize=8192*100;
 s.boot;
 
+// SYNTHS------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+SynthDef(\triOsc, {
+	arg freq=440, amp=0.1, time=1, detune=25, filterFreq=500;
+	var env =EnvGen.ar( Env.new([0,amp, 0], [time/8, time*7/8]), doneAction: Done.freeSelf);
+	var sound;
+	//var tri=LFTri.ar(freq*(1+detune/100), 0, 0.5);   //OScillatore a onda triangolare con detune
+	//var sqr=LFPar.ar(freq, 0, 0.5);            //Oscillatore a onda quadra
+	//var noise=WhiteNoise.ar(amp)*0.35;
+	//Rumore bianco per la texture
+	var filteredSound;
+	sound=SinOsc.ar(freq);
+	filteredSound=LPF.ar(sound, filterFreq);
+
+	Out.ar(98, filteredSound*env*amp);
+}).add;
+
+
+SynthDef(\paulstretchMono, { |out = 0, bufnum, envBufnum, pan = 0, stretch = 50000, window = 0.5, rate1=0.5, rate2=1.7, rate3=1, rate4=1.5, ampf1=0.1, ampf2=0.09, ampf3=0.8, ampf4=0.7, amp=0.8, gate=0.0, dur=1|
+
+	var trigPeriod, sig, chain, trig, pos, fftSize, env;
+	env = Env([0, amp, 0], [dur/8, dur*7/8]);
+	fftSize = 2**floor(log2(window*SampleRate.ir));
+	trigPeriod = fftSize/SampleRate.ir;
+	trig = Impulse.ar(1/trigPeriod);
+	pos = Demand.ar(trig, 0, demandUGens: Dseries(0, trigPeriod/stretch));
+	sig = [(GrainBuf.ar(1, trig, trigPeriod, bufnum, rate1, pos, envbufnum: envBufnum)), (GrainBuf.ar(1, trig, trigPeriod, bufnum, rate1, pos + (trigPeriod/(2*stretch)), envbufnum: envBufnum))]*amp;
+	sig = sig.collect({ |item, i|
+		chain = FFT(LocalBuf(fftSize), item, hop: 1.0, wintype: -1);
+
+		chain = PV_Diffuser(chain, 1 - trig);
+		item = IFFT(chain, wintype: -1);
+	});
+	sig = sig*PlayBuf.ar(1, envBufnum, 1/(trigPeriod), loop:1);
+	sig[1] = DelayC.ar(sig[1], trigPeriod/2, trigPeriod/2);
+	Out.ar(98, Pan2.ar(Mix.new(sig)*EnvGen.kr(env, doneAction: Done.freeSelf), pan));
+	Out.ar(80, Pan2.ar(Mix.new(sig)*EnvGen.kr(env, doneAction: Done.freeSelf), pan));
+}).add;
+
+{
+	var envBuf, envSignal, buffer;
+	~buffer = Buffer.readChannel(s, thisProcess.nowExecutingPath.dirname +/+ "string1.wav");
+	// The grain envelope
+	~envBuf = Buffer.alloc(s, s.sampleRate, 1);
+	envSignal = Signal.newClear(s.sampleRate).waveFill({|x| (1 - x.pow(2)).pow(1)}, -1.0, 1.0);
+	~envBuf.loadCollection(envSignal);
+	s.sync();
+}.fork;
+
+
+
+
+
+
+
+// EFFECTS -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+SynthDef(\clean, {
+	arg amp=1, freq=100, wet=1;
+	var in;
+	in=In.ar(98, 2);
+	in=FreeVerb2.ar(in[0], in[1], wet, 1, 0.8);
+	in=HPF.ar(in, freq: 300);
+	in=LPF.ar(in, freq: freq);
+	Out.ar([0,1], in*amp);
+}).add;
+
+SynthDef(\shimmerwet, {
+	arg amp=10, cutoff=1200;
+	var in;
+	in=In.ar(94, 2);
+	3.do{in=in.distort;
+	in=FreeVerb2.ar(in[0], in[1], 0.93, 1, 0.8);
+	//in=HPF.ar(in, freq: 1500.0);
+	in=LPF.ar(in, freq: cutoff);};
+	Out.ar(0, in*amp);
+}).add;
+
 SynthDef(\reverb, {
-	arg in = 98,
+	arg in = 80,
 		processMode = 0, // 0 uses Control values, 1 uses Bus for any param suffix Bus.
 		gain = 0, mix = 1,
 		processGain = 0, processGainBus = 99,
@@ -15,6 +93,7 @@ SynthDef(\reverb, {
 		tailDensity = 0.7, damping = 0.0005,
 		excursionDepth = 0.2, excursionRate = 5,
 		shimmerPitch = 4, shimmerPitchBus = 99,
+	    amp2=0,
 		out = 94;
 
 	// funcs
@@ -154,72 +233,7 @@ SynthDef(\reverb, {
 	outs = outs * gain.dbamp;
 
 	Out.ar(out, outs);
-}).add;
-
-
-
-
-
-
-
-
-
-SynthDef(\paulstretchMono, { |out = 0, bufnum, envBufnum, pan = 0, stretch = 50000, window = 0.5, rate1=0.5, rate2=1.7, rate3=1, rate4=1.5, ampf1=0.1, ampf2=0.09, ampf3=0.8, ampf4=0.7, amp=0.8, gate=0.0, dur=1|
-
-	var trigPeriod, sig, chain, trig, pos, fftSize, env;
-
-	env = Env([0, amp, 0], [dur/2, dur/2]);
-
-	fftSize = 2**floor(log2(window*SampleRate.ir));
-
-	trigPeriod = fftSize/SampleRate.ir;
-	trig = Impulse.ar(1/trigPeriod);
-	pos = Demand.ar(trig, 0, demandUGens: Dseries(0, trigPeriod/stretch));
-
-	sig = [(GrainBuf.ar(1, trig, trigPeriod, bufnum, rate1, pos, envbufnum: envBufnum)), (GrainBuf.ar(1, trig, trigPeriod, bufnum, rate1, pos + (trigPeriod/(2*stretch)), envbufnum: envBufnum))]*amp;
-
-	sig = sig.collect({ |item, i|
-		chain = FFT(LocalBuf(fftSize), item, hop: 1.0, wintype: -1);
-
-		chain = PV_Diffuser(chain, 1 - trig);
-		item = IFFT(chain, wintype: -1);
-	});
-
-	sig = sig*PlayBuf.ar(1, envBufnum, 1/(trigPeriod), loop:1);
-
-	sig[1] = DelayC.ar(sig[1], trigPeriod/2, trigPeriod/2);
-
-	Out.ar(98, Pan2.ar(Mix.new(sig)*EnvGen.kr(env, doneAction: Done.freeSelf), pan));
-}).add;
-
-
-
-
-
-
-
-
-
-
-SynthDef(\clean, {
-	arg amp=1, freq=100;
-	var in;
-	in=In.ar(98, 2);
-	in=FreeVerb2.ar(in[0], in[1], 1, 1, 0.8);
-	in=HPF.ar(in, freq: 300.0);
-	in=LPF.ar(in, freq: freq);
-	Out.ar(0, in*amp);
-}).add;
-
-SynthDef(\shimmerwet, {
-	arg amp=1, cutoff=1200;
-	var in;
-	in=In.ar(94, 2);
-	3.do{in=in.distort;
-	in=FreeVerb2.ar(in[0], in[1], 0.93, 1, 0.8);
-	in=HPF.ar(in, freq: 1500.0);
-	in=LPF.ar(in, freq: cutoff);};
-	Out.ar(0, in*amp);
+	Out.ar(0, outs*amp2);
 }).add;
 
 a=Synth.new(\clean);
@@ -227,49 +241,20 @@ y=Synth.new(\shimmerwet);
 z=Synth.new(\reverb);
 
 
-{
-	var envBuf, envSignal, buffer;
-	~buffer = Buffer.readChannel(s, thisProcess.nowExecutingPath.dirname +/+ "string1.wav");
-	// The grain envelope
-	~envBuf = Buffer.alloc(s, s.sampleRate, 1);
-	envSignal = Signal.newClear(s.sampleRate).waveFill({|x| (1 - x.pow(2)).pow(1)}, -1.0, 1.0);
-	~envBuf.loadCollection(envSignal);
-	s.sync();
-}.fork;
 
 
 
-SynthDef(\triOsc, {
-	arg freq=440, amp=0.1, time=1, detune=25, filterFreq=1000;
-	var env =EnvGen.ar( Env.new([0,amp, 0], [time/2, time/2]), doneAction: Done.freeSelf);
-	var sound;
-	var tri=LFTri.ar(freq*(1+detune/100), 0, 0.5);   //OScillatore a onda triangolare con detune
-	var sqr=LFPar.ar(freq, 0, 0.5);            //Oscillatore a onda quadra
-	//var noise=WhiteNoise.ar(amp)*0.35;                    //Rumore bianco per la texture
-	var filteredSound;
-
-
-	sound=tri+sqr;
-
-	sound=FreeVerb.ar(sound, 1, 0.9,0.5);
-	//sound = CombN.ar(sound, 0.1, 0.1, 4); // Aggiunge riverbero
-	//sound=DelayC.ar(sound, 0.5, 0.5, 1);
-	filteredSound=LPF.ar(sound, filterFreq);
-	//filteredSound= filteredSound* env;
-
-
-	Out.ar([0,1], filteredSound*env*amp);
-}).add;
 
 
 
+// COMMUNICATION------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 OSCdef.new(\0,
 	{
 		arg msg;
 		postln(msg);
-		//x=Synth.new(\paulstretchMono, [\bufnum, ~buffer.bufnum, \envBufnum, ~envBuf.bufnum, \rate1, 2**((msg[1]-24)/12), \dur, 2*msg[4], \amp, msg[2].linexp(0, 127, 0.5, 1)]);
-		k=Synth.new(\triOsc, [\freq, (msg[1]+12).midicps, \time, 2*msg[4], \amp, msg[2].linexp(0, 127, 0.2, 0.7)]);
+		x=Synth.new(\paulstretchMono, [\bufnum, ~buffer.bufnum, \envBufnum, ~envBuf.bufnum, \rate1, 2**((msg[1]-24)/12), \dur, msg[4], \amp, msg[2].linexp(0, 127, 0.5, 1)]);
+		k=Synth.new(\triOsc, [\freq, (msg[1]+12).midicps, \time, msg[4], \amp, msg[2].linexp(0, 127, 0.2, 1)]);
 		//{BPF.ar(WhiteNoise.ar, [msg[1]-12, msg[1]-12 ].midicps, 1e-5, Env.sine(2*msg[4]).kr(msg[2])).sum!2}.play;
 	},
 	'/numbers',
@@ -281,25 +266,13 @@ OSCdef.new(\chan1,
 	{
 		arg msg;
 		postln(msg);
-		//y.set(\amp, msg[1]*1.5);
-		//a.set(\freq, LinLin.kr(msg[1], 0, 1, 100, 800));
+		a.set(\amp, msg[1].linlin(0, 1, 0, 1), \wet, msg[1].linlin(0, 1, 1, 0.2), \freq, msg[1].linexp(0, 1, 500, 600));
+		y.set(\amp, msg[1].linlin(0, 1, 0.1, 0.00000000000000001));
+		z.set(\amp2, msg[1].linlin(0, 1, 0.001, 0.0000000000000000000000001));
 	},
 	'/chan1',
 	nil,
 	10000
 );
-/*
-	b = NetAddr.new("127.0.0.1", 57000);
-	// Funzione che manda numeri causali che rappresentano il set_order del markov model
-	~valori = [3, 4, 5, 6, 7, 8];
 
-	~close = Routine.new({
-		inf.do {
-			var chosen = ~valori.choose;
-			chosen.postln;
-			b.sendMsg("/closeness", chosen);
-			3.wait;
-	        }
-    }).play;
-*/
 )
