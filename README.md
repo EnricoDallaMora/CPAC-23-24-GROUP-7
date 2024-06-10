@@ -1,4 +1,6 @@
 # χαρμολύπη (Charmolypi)
+![preview](./assets/images/preview.png)
+##
 ### Abstract
 ***χαρμολύπη*** is an interactive artistic experience aiming to explore the *beauty of closeness* in the context of human relationships. 
 
