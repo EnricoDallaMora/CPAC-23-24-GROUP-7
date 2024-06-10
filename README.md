@@ -82,23 +82,21 @@ The file [play.py](./play.py) is resposible of setting up the OSC communication 
 
 ##
 ### Sound Synthesis - Supercollider
-`Server.default.options.memSize=8192*50;`
-`Server.default.options.inDevice_("Gruppo microfoni (Realtek(R) Audio");`
-`s.boot;`
+Supercollider receives OSC messages both from **Touchdesigner** and **Python**, the first ones containing information on synthesis parameters like cutoff frequencies or amplitude of synths while the latter notes velocity and duration.
+In the first section two synths are defined: `\triOSc` and `\paulstretchMono`. The first one is simple sinusoids responsible of giving a clear and intelligible sound. The latter implements the [paulstretch algorithm](https://hypermammut.sourceforge.net/paulstretch/) which, by opertating in the frequency domain by employing the `stft`, slows by huge amounts (50000:1 in this case) a given sample.
+
+![paulstretch](./assets/images/paulstretch.png)
+
+ The sample being used is [string1.wav](./string11.wav), a short and rich-in-harmonics sample from a synthetized guitar string. This synth will undergoe various effect wich will result in an abstract and aerial sound. The sound signal path is schematized in the following synthesis chain:
 
 ```mermaid
 graph LR
-A[bassOsc] -->B[bassGain]-->C[finalGain]
-D["chordOsc[]"] -->E["chordGain[]"]-->F[convolver]-->Z[convolverGain]-->C
-G[leadOsc]-->H[leadGain]-->C
-H[leadGain]-->I[delay]-->|delayGain|I
-I-->F
-I-->C
-M[arp1Osc]-->N[arp1Gain]-->C
-N-->I
-O[arp2Osc]-->P[arp2Gain]-->C
-C-->Q[low-pass filter]-->R[context.destination]
+A[\triOsc] -->B[\clean]-->C[out]
+D[\paulstretch] -->E[\reverb]-->F[\shimmerwet]-->C
+D-->B
 ```
+
+The `\reverb` synthDef implements a shimmer reverb which pitch-shifts the signal and add reverb to it, while `\shimmerwet` operates a feedback loop in which the signal is distorted and reverbed again. Finally the `\clean` synthDef is only responsible of routing the two synths to the output. OSC data from **Python** instantiates the various synths which will be freed from computing once their envelope is finished. The data coming from **Python**, on the other hand, tunes a set of parameters from the effects and the synths in order to provide a sense of dynamical change which reflects the users behaviour.
 ##
 ### Visualization - Touchdesigner
 
