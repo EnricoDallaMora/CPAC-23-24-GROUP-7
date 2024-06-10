@@ -6,7 +6,7 @@ The loss of social connection often leads to feeling lonely and pained. Relation
 
 Distance is hereby understood as solitude: individuals are self-contained beings when apart but when they choose to start getting closer to one another, an exchange gradually happens. This exchange will inevitably translate into the opening of their respective boundaries, sharing parts of themselves to receive something valuable in exchange. 
 
-The intention behind this project is to explore and abractly represent what humans possess and can choose to share of themselves, enhancing the value of the enriching effect closeness in relationships has on the individual. 
+The intention behind this project is to explore and abstractly represent what humans possess and can choose to share of themselves, enhancing the value of the enriching effect closeness in relationships has on the individual. 
 ## 
 
 ## Table of Contents
@@ -55,13 +55,8 @@ Developed by:
 - [🎞️Video Demo]()
 
 ## Flowchart and Technical Summary
-<!--
 
-<img width="813" alt="Screenshot 2024-06-04 at 01 37 49" src="https://github.com/emmaclt/CPAC-23-24-GROUP-7-draft1/assets/115798271/0fd18ac1-0e0a-4ff6-b65b-8fcd646241b6">
-
-<img width="1001" alt="Screenshot 2024-06-04 at 01 40 30" src="https://github.com/emmaclt/CPAC-23-24-GROUP-7-draft1/assets/115798271/1733e5d1-fcc9-4297-9ceb-42640fc45ec4">
--->
-![flowchart illustration](./assets/images/flowchart_theme.png)
+![flowchart illustration](./assets/images/flowchart_s.png)
 
 ### Sensor - Kinect V2
 The [Microsoft Kinect V2](https://en.wikipedia.org/wiki/Kinect) is a motion sensitive input device, capable of tracking the skeleton (i.e. the x, y and z positions of 24 joints) of up to six users. An infrared camera, along with an RGB one, allow the sensor to gather information both in good and poor lighting conditions, effectively allowing the installation to be set in a dark room.
