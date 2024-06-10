@@ -126,7 +126,7 @@ The Touchdesigner network is divided into several groups of nodes:
 These geometries are affected by a 3D noise with the `Noise SOP`: the noise amplitude is controlled by the `closeness` parameter which will be later discussed. Later on the geometries are converted to `TOPs` in order to be fed into the `ParticlesGPU` module.
 - `Particle system`:
 The `ParticlesGPU` module implements a `GLSL` script which instantiates particles with given geometries (squares) spawning according to the users position. The lifespan of the particles is very short in order to follow the player's movement. Turbulent forces contribute to the sense of movement by randomly displacing particles. A bloom effect is then added to enhance the visual result. Furthermore, another pointcloud in the background contributes to giving a sense of space.
-- `Closeness`: the `calculate_distances DAT` is responsible of calculating all the possible distances between active players. These distances will then be averaged and ranged in order to get the `closeness` parameter. This value will be sent via OSC messages both to **Python** and **SuperCollider** to set the order of the Markov chain and the previosly mentioned parameters for modelling the sound synthesis. 
+- `Closeness`: the `calculate_distances DAT` is responsible of calculating all the possible distances between active players. These distances will then be averaged and ranged in order to get the `closeness` parameter. This value will be sent via OSC messages both to **Python** and **SuperCollider** to set the order of the Markov chain and the previously mentioned parameters for modelling the sound synthesis. 
 
 ##
 
