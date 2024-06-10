@@ -54,7 +54,7 @@ Developed by:
 - [Project Proposal Presentation](./assets/presentation/prototipo_cpac.pdf)
 - [Final Project Presentation]()
 - [📄Report]()
-- [🎞️Video Demo]()
+- [🎞️Video Demo](https://youtu.be/q8xytoQ--RE?feature=shared)
 
 ## Flowchart and Technical Summary
 
