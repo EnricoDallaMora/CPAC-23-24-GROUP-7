@@ -91,8 +91,8 @@ In the first section two synths are defined: `\triOSc` and `\paulstretchMono`. T
 
 ```mermaid
 graph LR
-A[\triOsc] -->B[\clean]-->C[out]
-D[\paulstretch] -->E[\reverb]-->F[\shimmerwet]-->C
+A["\triOsc"] -->B["\clean"]-->C["out"]
+D["\paulstretch"] -->E["\reverb"]-->F["\shimmerwet"]-->C
 D-->B
 ```
 
