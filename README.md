@@ -98,17 +98,17 @@ Other elements contributing to sound synthesis are the `\reverb` synthDef, imple
 
 OSC data from **Python** instantiates the various synths then freed once their envelope comes to an end. To reflect users' behavior, data coming from **TouchDesigner** manages the tuning of a set of parameters for synths and effects, in order to achieve final perception of dynamical change. 
 ##
-### Visualization - Touchdesigner
+### Visualization - TouchDesigner
 
 ![td](./assets/images/td.png)
 
 The Touchdesigner network is divided into several groups of nodes:
-- `Geometry generation for spawning particles`: this network retrieves the player position data and nomalizes it with respect to the maximum and minimum value reached among users. This translates in the capability of the audio-visual system to auto-calibrate itself regardless of the room dimensions in which the installation is taking place. The max and min values for the x, y and z coordinates are retrieved in the `MIN_MAX` subnetwork by employing a DAT module which implements a python script. The channel values extracted from the `Kinect CHOP`are then converted to a spheres by means of surface operators - `SOPs` - which are bypassed accordingly to the kinect detecting the users or not. 
+- `Geometry generation for spawning particles`: this network retrieves the player position data and nomalizes it with respect to the maximum and minimum value reached among users. This translates in the capability of the audio-visual system to auto-calibrate itself regardless of the room dimensions in which the installation is taking place. The max and min values for the x, y and z coordinates are retrieved in the `MIN_MAX` subnetwork by employing a DAT module which implements a Python script. The channel values extracted from the `Kinect CHOP`are then converted to spheres by means of surface operators - `SOPs` - which are bypassed accordingly to the kinect detecting the users or not. 
 - `SOP-Top data for particle source`:
 These geometries are affected by a 3D noise with the `Noise SOP`: the noise amplitude is controlled by the `closeness` parameter which will be later discussed. Later on the geometries are converted to `TOPs` in order to be fed into the `ParticlesGPU` module.
 - `Particle system`:
-The `ParticlesGPU` module implements a `GLSL` script which instantiates particles with given geometry (squares) which spawn according to the users position. The lifespan of the particles is very short in order to follow the player's movement. Turbulent forces contribute to the sense of movement by randomly displacing particles. A bloom effect is then added to enhance the visual result. Furthermore, another pointcloud in the background contributes in giving a sense of space.
-- `Closeness`: the `calculate_distances DAT` is responsible of calculating all the possible distances between active players. These distances will then be averaged and ranged in order to get the `closeness` parameter. This value will be sent via OSC messages both to **Python** and **Supercollider** to set the order of the Markov chain and the previosly mentioned parameters for modelling the sound synthesis. 
+The `ParticlesGPU` module implements a `GLSL` script which instantiates particles with given geometries (squares) spawning according to the users position. The lifespan of the particles is very short in order to follow the player's movement. Turbulent forces contribute to the sense of movement by randomly displacing particles. A bloom effect is then added to enhance the visual result. Furthermore, another pointcloud in the background contributes to giving a sense of space.
+- `Closeness`: the `calculate_distances DAT` is responsible of calculating all the possible distances between active players. These distances will then be averaged and ranged in order to get the `closeness` parameter. This value will be sent via OSC messages both to **Python** and **SuperCollider** to set the order of the Markov chain and the previosly mentioned parameters for modelling the sound synthesis. 
 
 ##
 
