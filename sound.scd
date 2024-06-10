@@ -1,8 +1,9 @@
 ServerOptions.inDevices;
+ServerOptions.outDevices;
 
 (
 Server.default.options.memSize=8192*100;
-//Server.default.options.inDevice_("Gruppo microfoni (Realtek(R) Audio");
+Server.default.options.inDevice_("Gruppo microfoni (Realtek(R) Audio");
 s.boot;
 
 // SYNTHS------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -254,7 +255,7 @@ OSCdef.new(\0,
 		arg msg;
 		postln(msg);
 		x=Synth.new(\paulstretchMono, [\bufnum, ~buffer.bufnum, \envBufnum, ~envBuf.bufnum, \rate1, 2**((msg[1]-24)/12), \dur, msg[4], \amp, msg[2].linexp(0, 127, 0.5, 1)]);
-		k=Synth.new(\triOsc, [\freq, (msg[1]+12).midicps, \time, msg[4], \amp, msg[2].linexp(0, 127, 0.2, 1)]);
+		k=Synth.new(\triOsc, [\freq, (msg[1]+12).midicps, \time, msg[4], \amp, msg[2].linexp(0, 127, 0.2, 1.5)]);
 		//{BPF.ar(WhiteNoise.ar, [msg[1]-12, msg[1]-12 ].midicps, 1e-5, Env.sine(2*msg[4]).kr(msg[2])).sum!2}.play;
 	},
 	'/numbers',
