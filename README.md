@@ -51,7 +51,7 @@ Developed by:
 - [Lorenzo Previati](https://github.com/LorenzoPreviati22)
 
 ## Links
-- [Project Proposal Presentation](./assets/presentation/prototipo_cpac.pdf)
+- [Hackathon Project Presentation](./assets/presentation/prototipo_cpac.pdf)
 - [Final Project Presentation](assets/presentation/CPAC_CHARMOLYPI_group7.pptx)
 - [🎞️Video Demo](https://youtu.be/q8xytoQ--RE?feature=shared)
 
