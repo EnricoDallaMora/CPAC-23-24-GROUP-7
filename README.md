@@ -52,9 +52,10 @@ Developed by:
 
 ## Links
 - [Project Proposal Presentation](./assets/presentation/prototipo_cpac.pdf)
-- [Final Project Presentation](./asssets/presentation/CPAC_CHARMOLYPI_group7.pptx)
-<!--- [📄Report]()--->
+- [Final Project Presentation](assets/presentation/CPAC_CHARMOLYPI_group7.pptx)
 - [🎞️Video Demo](https://youtu.be/q8xytoQ--RE?feature=shared)
+
+<!--- [📄Report]()--->
 
 ## Flowchart and Technical Summary
 
