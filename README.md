@@ -70,13 +70,19 @@ Developed by:
 ### Sensor - Kinect V2
 The [Microsoft Kinect V2](https://en.wikipedia.org/wiki/Kinect) is a motion sensitive input device, capable of tracking the skeleton (i.e. the x, y and z positions of 24 joints) of up to six users. An infrared camera, along with an RGB one, allow the sensor to gather information both in good and poor lighting conditions, effectively allowing the installation to be set in a dark room.
 
-![kinect joints](./assets/images/kinect.png)
+<p align="center" width="100%">
+    <img width="50%" src="./assets/images/kinect.png">
+</p>
+
 ##
+
 ### Variable Length Markov Model - Python
 The python script is responsible of implementing a **variable length markov model** which constitutes the **generative music module** of the installation. Markov chains are stochastic transitional networks 
 used to model sequences of discrete events. It is based on the conditional probability $P(x_t, x_{t−1}, ..., x_{t-n})$ where $n$ is defined as the **order** of the chain. All the states, transitions and relative probabilities can be gathered in a **transition probability matrix**.
 
-![markov](./assets/images/markov.png)
+<p align="center" width="100%">
+    <img width="40%" src="./assets/images/markov.png">
+</p>
 
 In the context of this installation, a *variable length* markov model is implemented, meaning the matrix includes the transitional probabilities and states for all the orders up to the maximum. OSC messages sent from **TouchDesigner** will then set the order to be employed according to the calculated distance between users. Players being close together will result in an higher order of the chain i.e. in a more coherent and harmonic music generation. Conversely, when the users are far apart the music will be more stochastic.
 
@@ -90,7 +96,9 @@ The file [play.py](./play.py) is responsible of setting up the OSC communication
 SuperCollider receives OSC messages from both **TouchDesigner** and **Python**: the first ones contain information on synthesis parameters like cutoff frequencies or amplitude of synths, the latter notes velocity and duration.
 In the first section of the SC script, two synths are defined: `\triOSc` and `\paulstretchMono`. The first one generates simple sinusoids responsible of giving a clear and intelligible sound, the latter implements the [paulstretch algorithm](https://hypermammut.sourceforge.net/paulstretch/) which, by migrating to the frequency domain using `stft`, slows down a given sample by huge amounts (50000:1 in this case).
 
-![paulstretch](./assets/images/paulstretch.png)
+<p align="center" width="100%">
+    <img width="35%" src="./assets/images/paulstretch.png">
+</p>
 
 The sample being used is [string1.wav](./string11.wav), a short and rich-in-harmonics sample from a synthesized guitar string. The signal will undergo various effects eventually resulting in an abstract and aerial sound. The sound signal path is schematized in the following synthesis chain:
 
@@ -107,7 +115,10 @@ OSC data from **Python** instantiates the various synths then freed once their e
 ##
 ### Visualization - TouchDesigner
 
-![td](./assets/images/td.png)
+<p align="center" width="100%">
+    <img width="75%" src="./assets/images/td.png">
+</p>
+
 
 The Touchdesigner network is divided into several groups of nodes:
 - `Geometry generation for spawning particles`: this network retrieves the player position data and nomalizes it with respect to the maximum and minimum value reached among users. This translates in the capability of the audio-visual system to auto-calibrate itself regardless of the room dimensions in which the installation is taking place. The max and min values for the x, y and z coordinates are retrieved in the `MIN_MAX` subnetwork by employing a DAT module which implements a Python script. The channel values extracted from the `Kinect CHOP`are then converted to spheres by means of surface operators - `SOPs` - which are bypassed accordingly to the kinect detecting the users or not. 
