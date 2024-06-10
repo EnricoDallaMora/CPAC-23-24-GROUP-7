@@ -58,7 +58,8 @@ Developed by:
 
 ## Flowchart and Technical Summary
 
-![flowchart illustration](./assets/images/flowchart_s.png)
+<!---![flowchart illustration](./assets/images/flowchart_s.png)-->
+<img src="./assets/images/flowchart_s.png" width="2000">
 
 ### Sensor - Kinect V2
 The [Microsoft Kinect V2](https://en.wikipedia.org/wiki/Kinect) is a motion sensitive input device, capable of tracking the skeleton (i.e. the x, y and z positions of 24 joints) of up to six users. An infrared camera, along with an RGB one, allow the sensor to gather information both in good and poor lighting conditions, effectively allowing the installation to be set in a dark room.
