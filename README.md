@@ -37,7 +37,7 @@ The intention behind this project is to explore and abstractly represent what hu
 
 The **final purpose** of the installation is for the user to perceive *human connection* as something *empowering* and *valuable* and to highlight the joy that comes from choosing to transition from solitude to community. Closeness, sharing and openness are all choices that the installation wants to promote and encourage. 
 
-To achieve this, the installation exploits human-to-human interaction and both visual and audio implementations dynamically evolve contributing to make the users perceive closeness and connection as something valuable and energising 
+To achieve this, the installation exploits human-to-human interaction and both visual and audio implementations dynamically evolve contributing to make the users perceive closeness and connection as something valuable and energising. 
 
 
 ##  
@@ -77,8 +77,7 @@ The [Microsoft Kinect V2](https://en.wikipedia.org/wiki/Kinect) is a motion sens
 ##
 
 ### Variable Length Markov Model - Python
-The python script is responsible of implementing a **variable length markov model** which constitutes the **generative music module** of the installation. Markov chains are stochastic transitional networks 
-used to model sequences of discrete events. It is based on the conditional probability $P(x_t, x_{t−1}, ..., x_{t-n})$ where $n$ is defined as the **order** of the chain. All the states, transitions and relative probabilities can be gathered in a **transition probability matrix**.
+The python script is responsible of implementing a **Variable Length Markov Model** which constitutes the **generative music module** of the installation. Markov chains are stochastic transitional networks used to model sequences of discrete events. Computation is based on the conditional probability $P(x_t, x_{t−1}, ..., x_{t-n})$ where $n$ is defined as the **order** of the chain. All the states, transitions and relative probabilities can be gathered in a **transition probability matrix**.
 
 <p align="center" width="100%">
     <img width="40%" src="./assets/images/markov.png">
