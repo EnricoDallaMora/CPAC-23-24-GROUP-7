@@ -144,7 +144,7 @@ Our testing and development setup involved:
 - [SuperCollider](https://supercollider.github.io)
   - sound synthesis
   - audio output
-- [Open Sound Control](https://opensoundcontrol.stanford.edu/index.html)
+- [OSC - Open Sound Control](https://opensoundcontrol.stanford.edu/index.html)
   - networking and communication protocol
 
 ### External Resources
@@ -159,8 +159,13 @@ Our testing and development setup involved:
 
 ## Final Considerations
 ### Known Issues
+- Deprecated Kinect SDK (continuity issues)
+- Deterministic component of the sequence generation using the Variable Length Markov Chain [solved]
+- People on the background lightly interfere with overall functioning of the sensor 
 
 ### Possible Improvements
+- Include extra features to further model the system developement in time (e.g. use of Twitter's API in order to evaluate density of specific words to affect the probabilities used in music sequence generation)
+
 
 ## Run on your machine
 
