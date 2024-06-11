@@ -163,7 +163,7 @@ Our testing and development setup involved:
 - People on the background lightly interfere with overall functioning of the sensor 
 
 ### Possible Improvements
-- Include extra features to further model the system developement in time (e.g. use of Twitter's API in order to evaluate density of specific words to affect the probabilities used in music sequence generation)
+- Include extra features to further model the system evolution in time (e.g. use of Twitter's API in order to evaluate density of specific words to affect the probabilities used in music sequence generation)
 
 
 ## Run on your machine
